@@ -88,7 +88,25 @@ Two performance extraction scripts are provided for reference: [AMP](https://git
 
 Please cite us if you find AnalogGym useful.
 
-- AnalogGym: An Open and Practical Testing Suite for Analog Circuit Synthesis, Jintao Li, Haochang Zhi, Ruiyu Lyu, Wangzhen Li, Zhaori Bi<sup>\*</sup>, Keren Zhu<sup>\*</sup>, Yanhan Zhen, Weiwei Shan, Changhao Yan, Fan Yang, Yun Li<sup>\*</sup>, and Xuan Zeng<sup>\*</sup> IEEE/ACM International Conference on Computer-Aided Design (ICCAD '24), October 27--31, 2024, New York, NY, USA  (To appear)
+- AnalogGym: An Open and Practical Testing Suite for Analog Circuit Synthesis, Jintao Li, Haochang Zhi, Ruiyu Lyu, Wangzhen Li, Zhaori Bi<sup>\*</sup>, Keren Zhu<sup>\*</sup>, Yanhan Zhen, Weiwei Shan, Changhao Yan, Fan Yang, Yun Li<sup>\*</sup>, and Xuan Zeng<sup>\*</sup> IEEE/ACM International Conference on Computer-Aided Design (ICCAD '24), October 27--31, 2024, New York, NY, USA
+'''bash
+@inproceedings{10.1145/3676536.3697117,
+author = {Li, Jintao and Zhi, Haochang and Lyu, Ruiyu and Li, Wangzhen and Bi, Zhaori and Zhu, Keren and Zeng, Yanhan and Shan, Weiwei and Yan, Changhao and Yang, Fan and Li, Yun and Zeng, Xuan},
+title = {AnalogGym: An Open and Practical Testing Suite for Analog Circuit Synthesis},
+year = {2025},
+isbn = {9798400710773},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3676536.3697117},
+doi = {10.1145/3676536.3697117},
+booktitle = {Proceedings of the 43rd IEEE/ACM International Conference on Computer-Aided Design},
+articleno = {59},
+numpages = {9},
+keywords = {analog circuit optimization, electronic design automation},
+location = {Newark Liberty International Airport Marriott, New York, NY, USA},
+series = {ICCAD '24}
+}
+'''
 
 ## **Contact**
 
