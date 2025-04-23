@@ -54,5 +54,5 @@ There are three ways to run the simulation:
    python main_LDO.py
    ```
    to start the simulation.
-
+- `torch-1.13.1+cpu-cp310-cp310-linux_x86_64.whl`, `torch_cluster-1.6.1+pt113cpu-cp310-cp310-linux_x86_64.whl`, `torch_scatter-2.1.1+pt113cpu-cp310-cp310-linux_x86_64.whl`, `torch_sparse-0.6.17+pt113cpu-cp310-cp310-linux_x86_64.whl`, `torch_spline_conv-1.2.2+pt113cpu-cp310-cp310-linux_x86_64.whl`: Pre-downloaded PyTorch files for setup.
 The `torch-1.13.1+cpu` file is quite large, so you'll need to download it manually from this link: [PyTorch 1.13.1 Files](https://pypi.org/project/torch/1.13.1/#files). 
