@@ -51,7 +51,7 @@ Here is a breakdown of key files and directories:
 - `main_AMP.py`: Runs optimization for AMP circuits.
 - `main_LDO.py`: Runs optimization for LDO circuits.
 - `torch-1.13.1+cpu-cp310-cp310-linux_x86_64.whl`, `torch_cluster-1.6.1+pt113cpu-cp310-cp310-linux_x86_64.whl`, `torch_scatter-2.1.1+pt113cpu-cp310-cp310-linux_x86_64.whl`, `torch_sparse-0.6.17+pt113cpu-cp310-cp310-linux_x86_64.whl`, `torch_spline_conv-1.2.2+pt113cpu-cp310-cp310-linux_x86_64.whl`: Pre-downloaded PyTorch files for setup.
-
+The `torch-1.13.1+cpu` file is quite large, so you'll need to download it manually from this link: [PyTorch 1.13.1 Files](https://pypi.org/project/torch/1.13.1/#files). 
 ## Supplementary Information
 
 Please note that the command `conda install source-forge ngspice` can only install up to version `ngspice-41`, which doesn’t support DC scanning for temperature and current in circuit simulations. To use these features, manually download and replace with `ngspice-42` or `ngspice-43` from [ngspice on SourceForge](https://sourceforge.net/projects/ng-spice-rework/files/ng-spice-rework/43/).
