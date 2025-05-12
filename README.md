@@ -1,5 +1,23 @@
 # **AnalogGym**
 ![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)
+
+## ⚠️ Important Notice on `ngspice` Version
+
+This project currently uses `ngspice-41` in the Docker container, as it is the latest version available via Conda (`conda install -c conda-forge ngspice`). However, **`ngspice-41` has known limitations and may produce inaccurate simulation results**, particularly in DC sweeps involving temperature or current.
+
+To ensure correct simulation behavior, we **strongly recommend manually upgrading to `ngspice-42`, `ngspice-43`, or `ngspice-44`**, which resolve these issues. You can download newer versions from the [ngspice SourceForge repository](https://sourceforge.net/projects/ng-spice-rework/files/ng-spice-rework/).
+
+To update your Conda environment manually:
+
+```bash
+# Navigate to the bin directory of your environment
+cd /Anaconda/envs/analoggym-env/Library/bin
+
+# Replace the existing ngspice.exe with the newer one you downloaded
+```
+
+Please ensure your environment still satisfies all dependencies listed in `environment.yml` after making this change. We are also working on a fix to include newer ngspice versions in future releases.
+
 ## **About AnalogGym**
 
 This repository is the analog circuit synthesis testing suite, **AnalogGym**.
