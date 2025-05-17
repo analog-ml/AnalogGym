@@ -42,7 +42,7 @@ There are three ways to run the simulation:
    pip install tabulate
    pip install numpy
    pip install matplotlib
-   pip install lPython
+   pip install ipython
    ```
 
    For details on resolving ngspice version issues, refer to the Supplementary Information. Once the environment is set up, you can run:
