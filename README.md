@@ -105,31 +105,30 @@ Two performance extraction scripts are provided for reference: [AMP](https://git
 
 #### ✅ Original Formula
 
-The originally defined amplifier figure-of-merit (FOM) is given as:
+The originally defined amplifier $FOM_{AMP}$ is given as:
 
 $$
-\footnotesize
-\begin{aligned}
-\mathrm{FOM}_{\text{AMP}} = &\left( 
-\frac{\mathrm{PSRR}}{\mathrm{PSRR}_{\text{ref}}} \cdot 
-\frac{\mathrm{CMRR}}{\mathrm{CMRR}_{\text{ref}}} \cdot 
-\frac{\mathrm{Gain}}{\mathrm{Gain}_{\text{ref}}} \cdot 
-\frac{\mathrm{FOMS}}{\mathrm{FOMS}_{\text{ref}}} \cdot 
-\frac{\mathrm{FOML}}{\mathrm{FOML}_{\text{ref}}} 
-\right) 
-\\ & \times 
-\left( 
-\frac{T_s}{T_{s,\text{ref}}} \cdot 
-\frac{\mathrm{Area}}{\mathrm{Area}_{\text{ref}}} 
-\right)^{-1} 
-\\ & \times 
-\left( 
-\frac{v_n}{v_{n,\text{ref}}} \cdot \mathbb{I}(v_n > v_{n,\text{ref}}) \cdot 
-\frac{\mathrm{TC}}{\mathrm{TC}_{\text{ref}}} \cdot \mathbb{I}(\mathrm{TC} > \mathrm{TC}_{\text{ref}}) \cdot 
-\frac{v_{\mathrm{os}}}{v_{\mathrm{os},\text{ref}}} \cdot \mathbb{I}(v_{\mathrm{os}} > v_{\mathrm{os},\text{ref}})
+\mathrm{FOM}_{\text{AMP}} =
+\left(
+  \frac{\mathrm{PSRR}}{\mathrm{PSRR}_{\text{ref}}} \cdot
+  \frac{\mathrm{CMRR}}{\mathrm{CMRR}_{\text{ref}}} \cdot
+  \frac{\mathrm{Gain}}{\mathrm{Gain}_{\text{ref}}} \cdot
+  \frac{\mathrm{FOMS}}{\mathrm{FOMS}_{\text{ref}}} \cdot
+  \frac{\mathrm{FOML}}{\mathrm{FOML}_{\text{ref}}}
+\right)
+\cdot
+\left(
+  \frac{T_s}{T_{s,\text{ref}}} \cdot
+  \frac{\mathrm{Area}}{\mathrm{Area}_{\text{ref}}}
 \right)^{-1}
-\end{aligned}
+\cdot
+\left(
+  \frac{v_n}{v_{n,\text{ref}}} \cdot \mathbb{I}(v_n > v_{n,\text{ref}}) \cdot
+  \frac{\mathrm{TC}}{\mathrm{TC}_{\text{ref}}} \cdot \mathbb{I}(\mathrm{TC} > \mathrm{TC}_{\text{ref}}) \cdot
+  \frac{v_{\mathrm{os}}}{v_{\mathrm{os},\text{ref}}} \cdot \mathbb{I}(v_{\mathrm{os}} > v_{\mathrm{os},\text{ref}})
+\right)^{-1}
 $$
+
 
 The last term represents a **penalty factor**, applied to suppress degradation in three **precision-related metrics**: output noise voltage ($v_n$), temperature coefficient (TC), and input offset voltage ($v_{\mathrm{os}}$). Since these metrics are "smaller is better", a penalty is applied when they exceed their respective reference values.
 
@@ -147,39 +146,37 @@ While the original expression intends to penalize only when degradation occurs (
 To address these issues, we reformulate the penalty term as:
 
 $$
-\tiny
 \mathrm{FOM}_{\text{Penalty}} =
 \left(
-\max\left(1, \frac{v_n}{v_{n,\text{ref}}} \right) \cdot
-\max\left(1, \frac{\mathrm{TC}}{\mathrm{TC}_{\text{ref}}} \right) \cdot
-\max\left(1, \frac{v_{\mathrm{os}}}{v_{\mathrm{os},\text{ref}}} \right)
+  \max\left(1, \frac{v_n}{v_{n,\text{ref}}} \right) \cdot
+  \max\left(1, \frac{\mathrm{TC}}{\mathrm{TC}_{\text{ref}}} \right) \cdot
+  \max\left(1, \frac{v_{\mathrm{os}}}{v_{\mathrm{os},\text{ref}}} \right)
 \right)^{-1}
 $$
+
 
 This structure is logically equivalent to the original one: it penalizes only when a parameter exceeds its reference. 
 
 The updated $\mathrm{FOM}_{\text{AMP}}$ is:
 
 $$
-\tiny
-\begin{aligned}
 \mathrm{FOM}_{\text{AMP}} =
-&\left(
-\frac{\mathrm{PSRR}}{\mathrm{PSRR}_{\text{ref}}} \cdot
-\frac{\mathrm{CMRR}}{\mathrm{CMRR}_{\text{ref}}} \cdot
-\frac{\mathrm{Gain}}{\mathrm{Gain}_{\text{ref}}} \cdot
-\frac{\mathrm{FOM}_S}{\mathrm{FOM}_{S,\text{ref}}} \cdot
-\frac{\mathrm{FOM}_L}{\mathrm{FOM}_{L,\text{ref}}}
-\right) \\
-&\times
 \left(
-\frac{T_s}{T_{s,\text{ref}}} \cdot
-\frac{\mathrm{Area}}{\mathrm{Area}_{\text{ref}}}
+  \frac{\mathrm{PSRR}}{\mathrm{PSRR}_{\text{ref}}} \cdot
+  \frac{\mathrm{CMRR}}{\mathrm{CMRR}_{\text{ref}}} \cdot
+  \frac{\mathrm{Gain}}{\mathrm{Gain}_{\text{ref}}} \cdot
+  \frac{\mathrm{FOM}_S}{\mathrm{FOM}_{S,\text{ref}}} \cdot
+  \frac{\mathrm{FOM}_L}{\mathrm{FOM}_{L,\text{ref}}}
+\right)
+\cdot
+\left(
+  \frac{T_s}{T_{s,\text{ref}}} \cdot
+  \frac{\mathrm{Area}}{\mathrm{Area}_{\text{ref}}}
 \right)^{-1}
-\times
+\cdot
 \mathrm{FOM}_{\text{Penalty}}
-\end{aligned}
 $$
+
 
 
 
