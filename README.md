@@ -3,20 +3,23 @@
 
 ## ⚠️ Important Notice on `ngspice` Version
 
-This project currently uses `ngspice-41` in the Docker container, as it is the latest version available via Conda (`conda install -c conda-forge ngspice`). However, **`ngspice-41` has known limitations and may produce inaccurate simulation results**, particularly in DC sweeps involving temperature or current.
+The latest version of `ngspice` currently available through Conda (`conda install -c conda-forge ngspice`) is **`ngspice-41`**. However, this version has known limitations and may yield inaccurate simulation results, especially in **DC sweeps involving temperature or current sources**.
 
-To ensure correct simulation behavior, we **strongly recommend manually upgrading to `ngspice-42`, `ngspice-43`, or `ngspice-44`**, which resolve these issues. You can download newer versions from the [ngspice SourceForge repository](https://sourceforge.net/projects/ng-spice-rework/files/ng-spice-rework/).
+> ⚠️ **We strongly recommend NOT using the Conda-provided `ngspice`.**
 
-To update your Conda environment manually:
+Instead, please **manually upgrade to `ngspice-43` or later** (e.g., `ngspice-44`) to ensure simulation correctness. These versions fix critical issues present in `ngspice-41`.
+
+You can download newer releases from the official [ngspice SourceForge repository](https://sourceforge.net/projects/ng-spice-rework/files/ng-spice-rework/).
+
+### 🔧 Manual Upgrade Instructions
 
 ```bash
-# Navigate to the bin directory of your environment
+# Navigate to the bin directory of your Conda environment (example for Windows)
 cd /Anaconda/envs/analoggym-env/Library/bin
-
-# Replace the existing ngspice.exe with the newer one you downloaded
+# Replace the existing ngspice executable with the newer version you downloaded
 ```
 
-Please ensure your environment still satisfies all dependencies listed in `environment.yml` after making this change. We are also working on a fix to include newer ngspice versions in future releases.
+
 
 ## **About AnalogGym**
 
@@ -125,39 +128,14 @@ While the original expression intends to penalize only when degradation occurs (
 
 To address these issues, we reformulate the penalty term as:
 
-$$
-\mathrm{FOM}_{\text{Penalty}} =
-\left(
-  \max\left(1, \frac{v_n}{v_{n,\text{ref}}} \right) \cdot
-  \max\left(1, \frac{\mathrm{TC}}{\mathrm{TC}_{\text{ref}}} \right) \cdot
-  \max\left(1, \frac{v_{\mathrm{os}}}{v_{\mathrm{os},\text{ref}}} \right)
-\right)^{-1}
-$$
+![FOM_Penalty Formula](https://latex.codecogs.com/svg.image?%5Cdpi%7B120%7D%20%5Cmathrm%7BFOM%7D_%7B%5Ctext%7BPenalty%7D%7D%20%3D%20%5Cleft(%20%5Cmax%5Cleft(1,%20%5Cfrac%7Bv_n%7D%7Bv_%7Bn,%5Ctext%7Bref%7D%7D%7D%20%5Cright)%20%5Ccdot%20%5Cmax%5Cleft(1,%20%5Cfrac%7B%5Cmathrm%7BTC%7D%7D%7B%5Cmathrm%7BTC%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Cright)%20%5Ccdot%20%5Cmax%5Cleft(1,%20%5Cfrac%7Bv_%7B%5Cmathrm%7Bos%7D%7D%7D%7Bv_%7B%5Cmathrm%7Bos%7D,%5Ctext%7Bref%7D%7D%7D%20%5Cright)%20%5Cright)%5E%7B-1%7D) 
 
 
 This structure is logically equivalent to the original one: it penalizes only when a parameter exceeds its reference. 
 
 The updated $\mathrm{FOM}_{\text{AMP}}$ is:
 
-$$
-\mathrm{FOM}_{\text{AMP}} =
-\left(
-  \frac{\mathrm{PSRR}}{\mathrm{PSRR}_{\text{ref}}} \cdot
-  \frac{\mathrm{CMRR}}{\mathrm{CMRR}_{\text{ref}}} \cdot
-  \frac{\mathrm{Gain}}{\mathrm{Gain}_{\text{ref}}} \cdot
-  \frac{\mathrm{FOM}_S}{\mathrm{FOM}_{S,\text{ref}}} \cdot
-  \frac{\mathrm{FOM}_L}{\mathrm{FOM}_{L,\text{ref}}}
-\right)
-\cdot
-\left(
-  \frac{T_s}{T_{s,\text{ref}}} \cdot
-  \frac{\mathrm{Area}}{\mathrm{Area}_{\text{ref}}}
-\right)^{-1}
-\cdot
-\mathrm{FOM}_{\text{Penalty}}
-$$
-
-
+![FOM_AMP Formula](https://latex.codecogs.com/svg.image?%5Cdpi%7B150%7D%20%5Cmathrm%7BFOM%7D_%7B%5Ctext%7BAMP%7D%7D%20%3D%20%5Cleft(%20%5Cfrac%7B%5Cmathrm%7BPSRR%7D%7D%7B%5Cmathrm%7BPSRR%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BCMRR%7D%7D%7B%5Cmathrm%7BCMRR%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BGain%7D%7D%7B%5Cmathrm%7BGain%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BFOM%7D_S%7D%7B%5Cmathrm%7BFOM%7D_%7BS%2C%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BFOM%7D_L%7D%7B%5Cmathrm%7BFOM%7D_%7BL%2C%5Ctext%7Bref%7D%7D%7D%20%5Cright)%20%5Ccdot%20%5Cleft(%20%5Cfrac%7BT_s%7D%7BT_%7Bs%2C%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BArea%7D%7D%7B%5Cmathrm%7BArea%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Cright)%5E%7B-1%7D%20%5Ccdot%20%5Cmathrm%7BFOM%7D_%7B%5Ctext%7BPenalty%7D%7D) 
 
 
 ## **Citation**
