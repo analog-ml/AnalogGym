@@ -107,27 +107,7 @@ Two performance extraction scripts are provided for reference: [AMP](https://git
 
 The originally defined amplifier $FOM_{AMP}$ is given as:
 
-$$
-\mathrm{FOM}_{\text{AMP}} =
-\left(
-  \frac{\mathrm{PSRR}}{\mathrm{PSRR}_{\text{ref}}} \cdot
-  \frac{\mathrm{CMRR}}{\mathrm{CMRR}_{\text{ref}}} \cdot
-  \frac{\mathrm{Gain}}{\mathrm{Gain}_{\text{ref}}} \cdot
-  \frac{\mathrm{FOMS}}{\mathrm{FOMS}_{\text{ref}}} \cdot
-  \frac{\mathrm{FOML}}{\mathrm{FOML}_{\text{ref}}}
-\right)
-\cdot
-\left(
-  \frac{T_s}{T_{s,\text{ref}}} \cdot
-  \frac{\mathrm{Area}}{\mathrm{Area}_{\text{ref}}}
-\right)^{-1}
-\cdot
-\left(
-  \frac{v_n}{v_{n,\text{ref}}} \cdot \mathbb{I}(v_n > v_{n,\text{ref}}) \cdot
-  \frac{\mathrm{TC}}{\mathrm{TC}_{\text{ref}}} \cdot \mathbb{I}(\mathrm{TC} > \mathrm{TC}_{\text{ref}}) \cdot
-  \frac{v_{\mathrm{os}}}{v_{\mathrm{os},\text{ref}}} \cdot \mathbb{I}(v_{\mathrm{os}} > v_{\mathrm{os},\text{ref}})
-\right)^{-1}
-$$
+![FOM_AMP Formula](https://latex.codecogs.com/svg.image?%5Cdpi%7B150%7D%20%5Cbg_white%20%5Cmathrm%7BFOM%7D_%7B%5Ctext%7BAMP%7D%7D%20%3D%20%5Cleft(%20%5Cfrac%7B%5Cmathrm%7BPSRR%7D%7D%7B%5Cmathrm%7BPSRR%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BCMRR%7D%7D%7B%5Cmathrm%7BCMRR%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BGain%7D%7D%7B%5Cmathrm%7BGain%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BFOMS%7D%7D%7B%5Cmathrm%7BFOMS%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BFOML%7D%7D%7B%5Cmathrm%7BFOML%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Cright)%20%5Ccdot%20%5Cleft(%20%5Cfrac%7BT_s%7D%7BT_%7Bs%2C%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BArea%7D%7D%7B%5Cmathrm%7BArea%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Cright)%5E%7B-1%7D%20%5Ccdot%20%5Cleft(%20%5Cfrac%7Bv_n%7D%7Bv_%7Bn%2C%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cmathbb%7BI%7D(v_n%20%3E%20v_%7Bn%2C%5Ctext%7Bref%7D%7D)%20%5Ccdot%20%5Cfrac%7B%5Cmathrm%7BTC%7D%7D%7B%5Cmathrm%7BTC%7D_%7B%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cmathbb%7BI%7D(%5Cmathrm%7BTC%7D%20%3E%20%5Cmathrm%7BTC%7D_%7B%5Ctext%7Bref%7D%7D)%20%5Ccdot%20%5Cfrac%7Bv_%7B%5Cmathrm%7Bos%7D%7D%7D%7Bv_%7B%5Cmathrm%7Bos%7D%2C%5Ctext%7Bref%7D%7D%7D%20%5Ccdot%20%5Cmathbb%7BI%7D(v_%7B%5Cmathrm%7Bos%7D%7D%20%3E%20v_%7B%5Cmathrm%7Bos%7D%2C%5Ctext%7Bref%7D%7D)%20%5Cright)%5E%7B-1%7D) 
 
 
 The last term represents a **penalty factor**, applied to suppress degradation in three **precision-related metrics**: output noise voltage ($v_n$), temperature coefficient (TC), and input offset voltage ($v_{\mathrm{os}}$). Since these metrics are "smaller is better", a penalty is applied when they exceed their respective reference values.
