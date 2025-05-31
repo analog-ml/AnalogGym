@@ -7,7 +7,7 @@ The latest version of `ngspice` currently available through Conda (`conda instal
 
 > ⚠️ **We strongly recommend NOT using the Conda-provided `ngspice`.**
 
-Instead, please **manually upgrade to `ngspice-43` or later** (e.g., `ngspice-44`) to ensure simulation correctness. These versions fix critical issues present in `ngspice-41`.
+Instead, please **manually upgrade to `ngspice-42` or later** to ensure simulation correctness. These versions fix critical issues present in `ngspice-41`.
 
 You can download newer releases from the official [ngspice SourceForge repository](https://sourceforge.net/projects/ng-spice-rework/files/ng-spice-rework/).
 
