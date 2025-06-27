@@ -23,6 +23,8 @@ class GraphAMPNMCF:
         self.device = torch.device(
            "cpu"
         )
+        #TODO: what is the meaning of this hierarchy?
+        #  ('component_name', 'instance_name', 'model_name', 'type')
         self.ckt_hierarchy = (
                       ('M0','x1.XM0','pfet_01v8','m'),
                       ('M1','x1.XM1','pfet_01v8','m'),
@@ -87,6 +89,7 @@ class GraphAMPNMCF:
           [24,26], [26,24], 
             ], dtype=torch.long).t().to(self.device)
         
+        #TODO: what is the meaning of edge_type?
         self.edge_type = torch.tensor([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,             # M0
             0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,   # M1
@@ -136,6 +139,27 @@ class GraphAMPNMCF:
         self.C0_low = M_C0_low * (self.L_C0 * self.W_C0 * 2e-15 + (self.L_C0 + self.W_C0) *0.38e-15)
         self.C0_high = M_C0_high * (self.L_C0 * self.W_C0 * 2e-15 + (self.L_C0 + self.W_C0)*0.38e-15)
         
+
+
+        # The action space is defined to matched with the design variables in the netlist.
+        # which can be found in the AnalogGym/Amplifier/design_variables/Leung_NMCF_Pin_3
+        # or in the following description:
+
+        # .PARAM
+        # + MOSFET_10_1_L_gm2_PMOS=1 MOSFET_10_1_M_gm2_PMOS=4 
+        # + MOSFET_10_1_W_gm2_PMOS=1 MOSFET_11_1_L_gmf2_PMOS=1 
+        # + MOSFET_11_1_M_gmf2_PMOS=4 MOSFET_11_1_W_gmf2_PMOS=1 
+        # + MOSFET_23_1_L_gm3_NMOS=1 MOSFET_23_1_M_gm3_NMOS=4 
+        # + MOSFET_23_1_W_gm3_NMOS=1 MOSFET_8_2_L_gm1_PMOS=1 
+        # + MOSFET_8_2_M_gm1_PMOS=4 MOSFET_8_2_W_gm1_PMOS=1 
+        # + MOSFET_0_8_L_BIASCM_PMOS=1 MOSFET_0_8_M_BIASCM_PMOS=4 
+        # + MOSFET_0_8_W_BIASCM_PMOS=1 MOSFET_17_7_L_BIASCM_NMOS=1 
+        # + MOSFET_17_7_M_BIASCM_NMOS=4 MOSFET_17_7_W_BIASCM_NMOS=1 
+        # + MOSFET_21_2_L_LOAD2_NMOS=1 MOSFET_21_2_M_LOAD2_NMOS=4 
+        # + MOSFET_21_2_W_LOAD2_NMOS=1 CAPACITOR_0=5p CAPACITOR_1=3p 
+        # + CURRENT_0_BIAS=20u CLOAD=10p VCM=300m 
+
+
         self.action_space_low = np.array([ 0.5, 0.5, 1, # M0(W_low,L_low,M_low)
                                         0.5, 0.5, 1,    # M8
                                         0.5, 0.5, 1,      # M10
@@ -143,7 +167,7 @@ class GraphAMPNMCF:
                                         0.5, 0.5, 1,    # M17
                                         0.5, 0.5, 1,    # M21
                                         0.5, 0.5, 1,      # M23
-                                        3e-6,         # Ib
+                                        3e-6,         # Ib (unit: A, convert to mA: 0.003 mA)
                                         M_C0_low,     # C0
                                         M_C1_low])    # C1
         
@@ -154,7 +178,7 @@ class GraphAMPNMCF:
                                         10, 4, 50,     # M17
                                         10, 4, 50,    # M21
                                         10, 5, 50,    # M23
-                                        20e-6,        # Ib  
+                                        20e-6,        # Ib   (unit: A, convert to mA: 0.02 mA)
                                         M_C0_high,    # C0
                                         M_C1_high])   # C1
         
@@ -165,9 +189,24 @@ class GraphAMPNMCF:
         self.PSRP_target = -90
         self.PSRN_target = -90 
         
-        self.TC_target = 1e-6
-        self.Power_target = 2e2
-        self.vos_target = 4e-5
+        # The value self.TC_target = 1e-6 (which is 1 ppm/°C) is a very aggressive and ambitious target for temperature coefficient (TC) in analog circuit design, especially for amplifiers.
+
+        # Context:
+        # TC (Temperature Coefficient) typically measures how much a parameter (like offset voltage, reference voltage, etc.) changes per degree Celsius.
+        # 1e-6 means you are targeting a change of 1 part per million per degree Celsius.
+        # Typical Values:
+        # In precision analog design, a TC of 10 ppm/°C to 100 ppm/°C is considered very good.
+        # Achieving 1 ppm/°C is extremely challenging and usually only seen in specialized, high-end reference circuits or with extensive trimming and compensation.
+        # Conclusion:
+        # 1e-6 (1 ppm/°C) is not typical for most analog amplifiers and may be unrealistic unless you are designing a very high-precision reference or have special compensation techniques.
+        # For most practical amplifier designs, a target between 10e-6 (10 ppm/°C) and 100e-6 (100 ppm/°C) would be more reasonable.
+        # Recommendation:
+        # Unless you have a specific reason or technology that supports such low TC, consider relaxing the target to something like 1e-5 or 1e-4.
+
+
+        self.TC_target = 1e-6 #TODO: check if this is correct TC
+        self.Power_target = 2e2 
+        self.vos_target = 4e-5  # 0.00004 V = 40 uV. 
         
         self.cmrrdc_target = -80 
         self.dcgain_target = 130

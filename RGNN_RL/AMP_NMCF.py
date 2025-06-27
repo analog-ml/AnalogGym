@@ -11,6 +11,7 @@ from ckt_graphs import GraphAMPNMCF
 from dev_params import DeviceParams
 from utils import ActionNormalizer, OutputParser2
 from datetime import datetime
+from loguru import logger
 
 date = datetime.today().strftime('%Y-%m-%d')
 PWD = os.getcwd()
@@ -50,7 +51,7 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
                   0.5019434139098478, 4.213849479423464, 44,
                   4.660878181441053e-06, 
                   10,
-                  10])
+                  10]) #(W, L, M)
 
         """Run the initial simulations."""  
         action = np.array([self.W_M0, self.L_M0, self.M_M0, \
@@ -92,6 +93,10 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
             # open the netlist of the testbench
             AMP_NMCF_vars = open(f'{SPICE_NETLIST_DIR}/AMP_NMCF_vars.spice', 'r')
             lines = AMP_NMCF_vars.readlines()
+            # logger.info('Updating the netlist with new parameters...')
+            # logger.info("lines: " + str(lines))
+
+            # update the parameters in the netlist
             lines[0] = f'.param MOSFET_0_8_W_BIASCM_PMOS={W_M0} MOSFET_0_8_L_BIASCM_PMOS={L_M0} MOSFET_0_8_M_BIASCM_PMOS={M_M0}\n'
             lines[1] = f'.param MOSFET_8_2_W_gm1_PMOS={W_M8} MOSFET_8_2_L_gm1_PMOS={L_M8} MOSFET_8_2_M_gm1_PMOS={M_M8}\n'
             lines[2] = f'.param MOSFET_10_1_W_gm2_PMOS={W_M10} MOSFET_10_1_L_gm2_PMOS={L_M10} MOSFET_10_1_M_gm2_PMOS={M_M10}\n'
@@ -109,8 +114,8 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
             os.system(f'cd {SPICE_NETLIST_DIR}&& ngspice -b -o AMP_NMCF_ACDC.log AMP_NMCF_ACDC.cir')
             os.system(f'cd {SPICE_NETLIST_DIR}&& ngspice -b -o AMP_NMCF_Tran.log AMP_NMCF_Tran.cir')
             print('*** Simulations Done! ***')
-        except:
-            print('ERROR')
+        except Exception as e:
+            logger.error('ERROR: Failed to run simulations:' + str(e))
 
     def do_simulation(self, action):
         self._do_simulation(action)
@@ -471,11 +476,26 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
         '''Evaluate the performance'''
         ''' DC '''
         self.dc_results = self.sim_results.dc(file_name='AMP_NMCF_ACDC_DC')
+
+        #UNCLEAR: does only the first simulation result matter? (the first temperature point?)
         self.TC = self.dc_results[1][1]
         self.Power = self.dc_results[2][1]
         self.vos_1 = self.dc_results[3][1]
         self.vos = abs(self.vos_1)
-             
+
+        # Normalizing the target and current value using the formula (self.TC_target - self.TC) / (self.TC_target + self.TC) serves several important purposes:
+
+        # 1. **Scale Invariance**: This normalization makes the score independent of the absolute magnitude of the values. Whether the target and current values are large or small, the result is always in a comparable range, making it easier to interpret and combine with other normalized scores.
+
+        # 2. **Symmetry**: The formula is symmetric with respect to the target and current values. If the current value equals the target, the result is zero. If the current value is much less than the target, the result approaches +1; if it is much greater, the result approaches -1. This symmetry helps in evaluating both underperformance and overperformance in a balanced way.
+
+        # 3. **Bounded Output**: The output of this normalization is always between -1 and 1 (except for the case where both values are zero, which should be handled separately to avoid division by zero). This bounded range is useful for aggregating multiple scores and for stability in optimization or reinforcement learning algorithms.
+
+        # 4. **Relative Error**: The formula essentially measures the relative difference between the target and the current value, rather than the absolute difference. This is important in engineering and optimization tasks, where the significance of an error often depends on its size relative to the target.
+
+        # By using this normalization, the code ensures that the performance metric (in this case, TC_score) is meaningful, comparable across different scales, and suitable for use in reward functions or further analysis.
+
+
         self.TC_score = np.min([(self.TC_target - self.TC) / (self.TC_target + self.TC), 0])
         self.Power_score = np.min([(self.Power_target - self.Power) / (self.Power_target + self.Power), 0])
         self.vos_score = np.min([(self.vos_target - self.vos) / (self.vos_target + self.vos), 0])
@@ -531,6 +551,8 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
         self.tran_results = self.sim_results.tran(file_name='AMP_NMCF_Tran')
         self.sr_rise = self.tran_results[1][1]
         self.sr_fall = self.tran_results[2][1]
+
+        # Slew rate (SR) is calculated as the average of rise and fall times
         self.sr = (self.sr_rise + self.sr_fall) / 2 
         self.sr_score = np.min([(self.sr - self.sr_target) / (self.sr + self.sr_target), 0])
 
@@ -636,18 +658,18 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
                 if key[0] == 'M' or key[0] == 'm':
                     OP_M = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
                     OP_M_list.append(OP_M)
-                elif key[0] == 'R' or key[0] == 'r':
-                    OP_R = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
-                    OP_R_list.append(OP_R)
-                elif key[0] == 'C' or key[0] == 'c':
-                    OP_C = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
-                    OP_C_list.append(OP_C)   
-                elif key[0] == 'V' or key[0] == 'v':
-                    OP_V = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
-                    OP_V_list.append(OP_V)
-                elif key[0] == 'I' or key[0] == 'i':
-                    OP_I = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
-                    OP_I_list.append(OP_I)   
+                # elif key[0] == 'R' or key[0] == 'r':
+                #     OP_R = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
+                #     OP_R_list.append(OP_R)
+                # elif key[0] == 'C' or key[0] == 'c':
+                #     OP_C = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
+                #     OP_C_list.append(OP_C)   
+                # elif key[0] == 'V' or key[0] == 'v':
+                #     OP_V = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
+                #     OP_V_list.append(OP_V)
+                # elif key[0] == 'I' or key[0] == 'i':
+                #     OP_I = np.array([op_results[key][f'{item}'] for item in list(op_results[key])])    
+                #     OP_I_list.append(OP_I)   
                 else:
                     None
                     
@@ -680,41 +702,44 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
                 OP_M_mean_dict[key] = OP_M_mean[idx]
                 OP_M_std_dict[key] = OP_M_std[idx]
         
-        if OP_R_lists.size != 0:
-            OP_R_mean = np.mean(OP_R_lists.reshape(-1, OP_R_lists.shape[-1]), axis=0)
-            OP_R_std = np.std(OP_R_lists.reshape(-1, OP_R_lists.shape[-1]),axis=0)
-            OP_R_mean_dict = {}
-            OP_R_std_dict = {}
-            for idx, key in enumerate(self. params_r):
-                OP_R_mean_dict[key] = OP_R_mean[idx]
-                OP_R_std_dict[key] = OP_R_std[idx]
+        # The following code is commented out because the OP_R, OP_C, OP_V, and OP_I are not used in the current implementation.
+        # Uncomment the following code if you want to include these parameters in the normalization process.
+
+        # if OP_R_lists.size != 0:
+        #     OP_R_mean = np.mean(OP_R_lists.reshape(-1, OP_R_lists.shape[-1]), axis=0)
+        #     OP_R_std = np.std(OP_R_lists.reshape(-1, OP_R_lists.shape[-1]),axis=0)
+        #     OP_R_mean_dict = {}
+        #     OP_R_std_dict = {}
+        #     for idx, key in enumerate(self. params_r):
+        #         OP_R_mean_dict[key] = OP_R_mean[idx]
+        #         OP_R_std_dict[key] = OP_R_std[idx]
                 
-        if OP_C_lists.size != 0:
-            OP_C_mean = np.mean(OP_C_lists.reshape(-1, OP_C_lists.shape[-1]), axis=0)
-            OP_C_std = np.std(OP_C_lists.reshape(-1, OP_C_lists.shape[-1]),axis=0)
-            OP_C_mean_dict = {}
-            OP_C_std_dict = {}
-            for idx, key in enumerate(self.params_c):
-                OP_C_mean_dict[key] = OP_C_mean[idx]
-                OP_C_std_dict[key] = OP_C_std[idx]     
+        # if OP_C_lists.size != 0:
+        #     OP_C_mean = np.mean(OP_C_lists.reshape(-1, OP_C_lists.shape[-1]), axis=0)
+        #     OP_C_std = np.std(OP_C_lists.reshape(-1, OP_C_lists.shape[-1]),axis=0)
+        #     OP_C_mean_dict = {}
+        #     OP_C_std_dict = {}
+        #     for idx, key in enumerate(self.params_c):
+        #         OP_C_mean_dict[key] = OP_C_mean[idx]
+        #         OP_C_std_dict[key] = OP_C_std[idx]     
                 
-        if OP_V_lists.size != 0:
-            OP_V_mean = np.mean(OP_V_lists.reshape(-1, OP_V_lists.shape[-1]), axis=0)
-            OP_V_std = np.std(OP_V_lists.reshape(-1, OP_V_lists.shape[-1]),axis=0)
-            OP_V_mean_dict = {}
-            OP_V_std_dict = {}
-            for idx, key in enumerate(self.params_v):
-                OP_V_mean_dict[key] = OP_V_mean[idx]
-                OP_V_std_dict[key] = OP_V_std[idx]
+        # if OP_V_lists.size != 0:
+        #     OP_V_mean = np.mean(OP_V_lists.reshape(-1, OP_V_lists.shape[-1]), axis=0)
+        #     OP_V_std = np.std(OP_V_lists.reshape(-1, OP_V_lists.shape[-1]),axis=0)
+        #     OP_V_mean_dict = {}
+        #     OP_V_std_dict = {}
+        #     for idx, key in enumerate(self.params_v):
+        #         OP_V_mean_dict[key] = OP_V_mean[idx]
+        #         OP_V_std_dict[key] = OP_V_std[idx]
         
-        if OP_I_lists.size != 0:
-            OP_I_mean = np.mean(OP_I_lists.reshape(-1, OP_I_lists.shape[-1]), axis=0)
-            OP_I_std = np.std(OP_I_lists.reshape(-1, OP_I_lists.shape[-1]),axis=0)
-            OP_I_mean_dict = {}
-            OP_I_std_dict = {}
-            for idx, key in enumerate(self.params_i):
-                OP_I_mean_dict[key] = OP_I_mean[idx]
-                OP_I_std_dict[key] = OP_I_std[idx]
+        # if OP_I_lists.size != 0:
+        #     OP_I_mean = np.mean(OP_I_lists.reshape(-1, OP_I_lists.shape[-1]), axis=0)
+        #     OP_I_std = np.std(OP_I_lists.reshape(-1, OP_I_lists.shape[-1]),axis=0)
+        #     OP_I_mean_dict = {}
+        #     OP_I_std_dict = {}
+        #     for idx, key in enumerate(self.params_i):
+        #         OP_I_mean_dict[key] = OP_I_mean[idx]
+        #         OP_I_std_dict[key] = OP_I_std[idx]
 
         self.OP_M_mean_std = {
             'OP_M_mean': OP_M_mean_dict,         
