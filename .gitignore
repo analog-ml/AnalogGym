@@ -1,1 +1,8 @@
 .DS_Store
+mosfet_model/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl 
+simulations/
