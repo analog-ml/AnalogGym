@@ -171,7 +171,22 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
             terminated = True
         else:
             terminated = False
-          
+
+
+        info['TC_score'] =  self.TC_score
+        info['Power_score'] = self.Power_score
+        info['vos_score'] = self.vos_score
+        info['cmrrdc_score'] = self.cmrrdc_score
+        info['dcgain_score'] =  self.dcgain_score
+
+        info['GBW_score'] = self.GBW_score
+        info['phase_margin_deg_score'] = self.phase_margin_score
+        info['PSRP_score'] = self.PSRP_score
+        info['PSRN_score'] = self.PSRN_score
+
+        info['sr_score']= self.sr_score
+        info['settlingTime_score'] = self.settlingTime_score
+
         print(tabulate(
             [
                 ['TC', self.TC, self.TC_target],

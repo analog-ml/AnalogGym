@@ -12,6 +12,12 @@ from utils import trunc_normal
 from IPython.display import clear_output
 import matplotlib.pyplot as plt
 
+from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+
+writer = SummaryWriter("runs/DDPG_AMP_NMCF")
+
+
 class ReplayBuffer:
     """A simple numpy replay buffer."""
 
@@ -270,7 +276,16 @@ class DDPGAgent:
                 actor_loss, critic_loss = self.update_model()
                 actor_losses.append(actor_loss)
                 critic_losses.append(critic_loss)
-            
+
+            # write tensorboard log
+            for metric, val in info.items():
+                if "_score" in metric:
+                    plt_name = f"scores/{metric.replace('_score', '')}"
+                    writer.add_scalar(plt_name, val, self.total_step)
+                else:
+                    writer.add_scalar(f"metrics/{metric}", val, self.total_step)
+                writer.add_scalar(f"reward", reward, self.total_step)
+
             # plotting
             if self.total_step % plotting_interval == 0:
                 self._plot(
