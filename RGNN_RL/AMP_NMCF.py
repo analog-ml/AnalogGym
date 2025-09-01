@@ -13,14 +13,22 @@ from utils import ActionNormalizer, OutputParser2
 from datetime import datetime
 from loguru import logger
 
-date = datetime.today().strftime('%Y-%m-%d')
+date = datetime.today().strftime("%Y-%m-%d")
 PWD = os.getcwd()
-SPICE_NETLIST_DIR = f'{PWD}/simulations'
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+SPICE_NETLIST_DIR = f"{PWD}/simulations"
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 CktGraph = GraphAMPNMCF
-            
+# fmt: off
 class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
+    """
+    This class is inherited from gym.Env , CktGraph (where the circuit topology is defined) and DeviceParams
+
+    Args:
+        gym (_type_): _description_
+        CktGraph (_type_): _description_
+        DeviceParams (_type_): _description_
+    """
 
     def __init__(self):
         gym.Env.__init__(self)
@@ -28,8 +36,8 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
         DeviceParams.__init__(self, self.ckt_hierarchy)
 
         self.CktGraph = CktGraph()
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=self.obs_shape, dtype=np.float64)
-        self.action_space = spaces.Box(low=-1, high=1, shape=self.action_shape, dtype=np.float64)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=self.obs_shape, dtype=np.float64) # shape: [29 #nodes, 12 #features]
+        self.action_space = spaces.Box(low=-1, high=1, shape=self.action_shape, dtype=np.float64) # 3 (W, L, M) * num_transistors + 1 current + 2 caps
         
     def _initialize_simulation(self):
         self.W_M0, self.L_M0, self.M_M0, \
@@ -163,7 +171,22 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
             terminated = True
         else:
             terminated = False
-          
+
+
+        info['TC_score'] =  self.TC_score
+        info['Power_score'] = self.Power_score
+        info['vos_score'] = self.vos_score
+        info['cmrrdc_score'] = self.cmrrdc_score
+        info['dcgain_score'] =  self.dcgain_score
+
+        info['GBW_score'] = self.GBW_score
+        info['phase_margin_deg_score'] = self.phase_margin_score
+        info['PSRP_score'] = self.PSRP_score
+        info['PSRN_score'] = self.PSRN_score
+
+        info['sr_score']= self.sr_score
+        info['settlingTime_score'] = self.settlingTime_score
+
         print(tabulate(
             [
                 ['TC', self.TC, self.TC_target],
@@ -506,7 +529,7 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
         if self.cmrrdc > 0 :
             self.cmrrdc_score = -1
         else : 
-            self.cmrrdc_score = np.min([(self.cmrrdc - self.cmrrdc_target) / (self.cmrrdc + self.cmrrdc_target), 0])
+            self.cmrrdc_score = np.min([(self.cmrrdc - self.cmrrdc_target) / (self.cmrrdc + self.cmrrdc_target), 0]) # target = -80
             if self.cmrrdc < self.cmrrdc_target:
                 self.cmrrdc_score = 0
 
@@ -514,7 +537,7 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
         if self.PSRP > 0 :
             self.PSRP_score = -1
         else : 
-            self.PSRP_score = np.min([(self.PSRP - self.PSRP_target) / (self.PSRP + self.PSRP_target), 0])
+            self.PSRP_score = np.min([(self.PSRP - self.PSRP_target) / (self.PSRP + self.PSRP_target), 0]) # target = -90
             if self.PSRP < self.PSRP_target:
                 self.PSRP_score = 0
 
@@ -522,19 +545,19 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
         if self.PSRN > 0 :
             self.PSRN_score = -1
         else : 
-            self.PSRN_score = np.min([(self.PSRN - self.PSRN_target) / (self.PSRN + self.PSRN_target), 0])
+            self.PSRN_score = np.min([(self.PSRN - self.PSRN_target) / (self.PSRN + self.PSRN_target), 0]) # target = -90
             if self.PSRN < self.PSRN_target:
                 self.PSRN_score = 0
 
         self.dcgain = self.ac_results[4][1]
         if self.dcgain > 0 :
             try:
-                self.dcgain_score = np.min([(self.dcgain - self.dcgain_target) / (self.dcgain + self.dcgain_target), 0])
+                self.dcgain_score = np.min([(self.dcgain - self.dcgain_target) / (self.dcgain + self.dcgain_target), 0]) # target = 130
                 self.GBW_PM_results = self.sim_results.GBW_PM(file_name='AMP_NMCF_ACDC_GBW_PM')
                 self.GBW = self.GBW_PM_results[1][1]
-                self.GBW_score = np.min([(self.GBW - self.GBW_target) / (self.GBW + self.GBW_target), 0])
+                self.GBW_score = np.min([(self.GBW - self.GBW_target) / (self.GBW + self.GBW_target), 0]) # target = 1e6
                 self.phase_margin = self.GBW_PM_results[2][1]
-                self.phase_margin_score = np.min([(self.phase_margin - self.phase_margin_target) / (self.phase_margin + self.phase_margin_target), 0])
+                self.phase_margin_score = np.min([(self.phase_margin - self.phase_margin_target) / (self.phase_margin + self.phase_margin_target), 0]) # target = 60
             except: 
                 if self.phase_margin > 180 or self.phase_margin < 0:
                     self.phase_margin = 0
@@ -748,3 +771,4 @@ class AMPNMCFEnv(gym.Env, CktGraph, DeviceParams):
 
         with open(f'{SPICE_NETLIST_DIR}/AMP_NMCF_op_mean_std.json','w') as file:
             json.dump(self.OP_M_mean_std, file)
+# fmt: on

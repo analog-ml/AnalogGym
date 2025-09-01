@@ -1,5 +1,5 @@
 """
-This script is used to generate block of spice commands that used to 
+This script is used to generate block of spice commands that used to
 access BSIM4 device internal device parameters.
 
 This one is for SKY130 process.
@@ -8,9 +8,31 @@ You can just run it once to generate the script for the DCOP analysis.
 
 """
 
-from ckt_graphs import  GraphLDOtestbench, GraphAMPNMCF
+from ckt_graphs import GraphLDOtestbench, GraphAMPNMCF
 
+# fmt: off
 class DeviceParams(object):
+    """
+    This class is used to generate the file: RGNN_RL/simulation/AMP_NMCF_dev_params.spice
+    for storing abbreviation of device parameters
+
+    Example:
+        let gmbs_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[gmbs]
+        let gm_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[gm]
+        let gds_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[gds]
+        let vdsat_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[vdsat]
+        let vth_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[vth]
+        let id_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[id]
+        let ibd_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[ibd]
+        let ibs_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[ibs]
+        let gbd_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[gbd]
+        let gbs_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[gbs]
+        let isub_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[isub]
+        let igidl_M0=@m.x1.XM0.msky130_fd_pr__pfet_01v8[igidl]
+
+        write AMP_NMCF_op gmbs_M0 gm_M0 gds_M0 vdsat_M0 vth_M0  ... 
+    """
+
     def __init__(self, ckt_hierarchy, warning_msg=False):
         self.ckt_hierarchy = ckt_hierarchy
         self.dev_names_mos = (
@@ -235,6 +257,7 @@ class DeviceParams(object):
                         raise ValueError('In this PDK, transistor is instantiated as a subckt! Subckt is missing here.')
                     else:
                         if dev_name in self.dev_names_mos:
+                            # e.g: let gm_M0 = @m.x1.XM0.msky130_fd_pr__pfet_01v8[gm]
                             line = f'let {param}_{symbol_name}=@m.{subckt}.msky130_fd_pr__{dev_name}[{param}]'
                         else:
                             raise ValueError('This device is not defined in this PDK.')
@@ -306,17 +329,6 @@ if __name__ == '__main__':
     with open('simulations/AMP_NMCF_dev_params.spice', 'w') as f:
         for line in dev_params_script:
             f.write(f'{line}\n')                        
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+# fmt: on
